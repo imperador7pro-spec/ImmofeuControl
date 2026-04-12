@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  immofeucontrol:
+    build: .
+    container_name: immofeucontrol
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./snapshots:/app/snapshots
+      - ./recordings:/app/recordings
+      - ./logs:/app/logs
+      - ./models:/app/models
+      - ./immofeucontrol.db:/app/immofeucontrol.db
+    env_file:
+      - .env
+    restart: unless-stopped
+    environment:
+      - IMMOFEU_HOST=0.0.0.0
+      - IMMOFEU_PORT=8000

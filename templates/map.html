@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImmofeuControl - Carte</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { height: calc(100vh - 60px); width: 100%; }
+        .camera-popup { min-width: 200px; }
+        .camera-popup h4 { margin: 0 0 8px 0; }
+        .camera-popup .status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; }
+        .camera-popup .status.online { background: #22c55e; color: white; }
+        .camera-popup .status.offline { background: #ef4444; color: white; }
+        .camera-popup .status.error { background: #f59e0b; color: white; }
+        .incident-marker { background: red; border-radius: 50%; border: 2px solid white; animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="logo">&#9888;</span>
+            <h1>ImmofeuControl</h1>
+        </div>
+        <div class="nav-links">
+            <a href="/">Dashboard</a>
+            <a href="/map" class="active">Carte</a>
+            <a href="/docs" target="_blank">API</a>
+        </div>
+        <div class="nav-status">
+            <span id="ws-status" class="status-badge offline">Deconnecte</span>
+        </div>
+    </nav>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([46.603354, 1.888334], 6); // France center
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const cameraMarkers = {};
+        const incidentMarkers = [];
+
+        // Camera icons
+        const cameraIconOnline = L.divIcon({
+            html: '<div style="background:#22c55e;width:12px;height:12px;border-radius:50%;border:2px solid white;"></div>',
+            iconSize: [16, 16], className: ''
+        });
+        const cameraIconOffline = L.divIcon({
+            html: '<div style="background:#ef4444;width:12px;height:12px;border-radius:50%;border:2px solid white;"></div>',
+            iconSize: [16, 16], className: ''
+        });
+        const incidentIcon = L.divIcon({
+            html: '<div class="incident-marker" style="width:16px;height:16px;"></div>',
+            iconSize: [20, 20], className: ''
+        });
+
+        async function loadCameras() {
+            try {
+                const response = await fetch('/api/cameras');
+                const cameras = await response.json();
+                cameras.forEach(cam => {
+                    if (cam.latitude && cam.longitude) {
+                        const icon = cam.status === 'online' ? cameraIconOnline : cameraIconOffline;
+                        const marker = L.marker([cam.latitude, cam.longitude], { icon })
+                            .addTo(map)
+                            .bindPopup(`
+                                <div class="camera-popup">
+                                    <h4>${cam.name}</h4>
+                                    <p>${cam.location_name || ''}</p>
+                                    <span class="status ${cam.status}">${cam.status}</span>
+                                    <br><br>
+                                    <a href="/api/cameras/${cam.id}/snapshot" target="_blank">Voir snapshot</a>
+                                </div>
+                            `);
+                        cameraMarkers[cam.id] = marker;
+                    }
+                });
+            } catch (e) {
+                console.error('Failed to load cameras:', e);
+            }
+        }
+
+        // WebSocket for real-time incidents on map
+        let ws;
+        function connectWebSocket() {
+            const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${location.host}/ws/alerts`);
+
+            ws.onopen = () => {
+                document.getElementById('ws-status').className = 'status-badge online';
+                document.getElementById('ws-status').textContent = 'Connecte';
+            };
+
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'alert' && msg.data.camera_id in cameraMarkers) {
+                    const camMarker = cameraMarkers[msg.data.camera_id];
+                    const latlng = camMarker.getLatLng();
+                    const marker = L.marker(latlng, { icon: incidentIcon })
+                        .addTo(map)
+                        .bindPopup(`
+                            <div class="camera-popup">
+                                <h4>ALERTE: ${msg.data.incident_type.toUpperCase()}</h4>
+                                <p>Severite: ${msg.data.severity}</p>
+                                <p>Confiance: ${(msg.data.confidence * 100).toFixed(0)}%</p>
+                                <p>${msg.data.description}</p>
+                            </div>
+                        `)
+                        .openPopup();
+                    incidentMarkers.push(marker);
+                    // Remove after 5 minutes
+                    setTimeout(() => { map.removeLayer(marker); }, 300000);
+                }
+            };
+
+            ws.onclose = () => {
+                document.getElementById('ws-status').className = 'status-badge offline';
+                document.getElementById('ws-status').textContent = 'Deconnecte';
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        loadCameras();
+        connectWebSocket();
+    </script>
+</body>
+</html>

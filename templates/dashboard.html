@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImmofeuControl - Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="logo">&#9888;</span>
+            <h1>ImmofeuControl</h1>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="active">Dashboard</a>
+            <a href="/map">Carte</a>
+            <a href="/docs" target="_blank">API</a>
+        </div>
+        <div class="nav-status">
+            <span id="ws-status" class="status-badge offline">Deconnecte</span>
+        </div>
+    </nav>
+
+    <!-- Alert Banner -->
+    <div id="alert-banner" class="alert-banner hidden">
+        <div class="alert-content">
+            <span class="alert-icon">&#9888;</span>
+            <span id="alert-text"></span>
+            <button onclick="dismissAlert()" class="alert-dismiss">&times;</button>
+        </div>
+    </div>
+
+    <main class="dashboard">
+        <!-- Stats Cards -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon cameras-icon">&#128247;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="cameras-online">0</span>
+                    <span class="stat-label">Cameras en ligne</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon incidents-icon">&#9888;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="incidents-today">0</span>
+                    <span class="stat-label">Incidents aujourd'hui</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon alerts-icon">&#128276;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="alerts-sent">0</span>
+                    <span class="stat-label">Alertes envoyees</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon frames-icon">&#128065;</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="frames-analyzed">0</span>
+                    <span class="stat-label">Frames analysees</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Camera Grid -->
+            <section class="panel cameras-panel">
+                <div class="panel-header">
+                    <h2>Cameras</h2>
+                    <button onclick="openAddCameraModal()" class="btn btn-primary">+ Ajouter</button>
+                </div>
+                <div id="camera-grid" class="camera-grid">
+                    <p class="empty-state">Aucune camera configuree. Ajoutez une camera pour commencer.</p>
+                </div>
+            </section>
+
+            <!-- Live Alerts Feed -->
+            <section class="panel alerts-panel">
+                <div class="panel-header">
+                    <h2>Alertes en temps reel</h2>
+                    <button onclick="clearAlerts()" class="btn btn-secondary">Effacer</button>
+                </div>
+                <div id="alerts-feed" class="alerts-feed">
+                    <p class="empty-state">En attente d'alertes...</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Recent Incidents Table -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Incidents recents</h2>
+                <div class="filter-group">
+                    <select id="filter-type" onchange="loadIncidents()">
+                        <option value="">Tous les types</option>
+                        <option value="accident">Accident</option>
+                        <option value="fall">Chute</option>
+                        <option value="fire">Feu</option>
+                        <option value="smoke">Fumee</option>
+                        <option value="medical_emergency">Urgence medicale</option>
+                    </select>
+                    <select id="filter-severity" onchange="loadIncidents()">
+                        <option value="">Toutes severites</option>
+                        <option value="critical">Critique</option>
+                        <option value="high">Eleve</option>
+                        <option value="medium">Moyen</option>
+                        <option value="low">Bas</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="incidents-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date/Heure</th>
+                            <th>Camera</th>
+                            <th>Type</th>
+                            <th>Severite</th>
+                            <th>Confiance</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incidents-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add Camera Modal -->
+    <div id="add-camera-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ajouter une camera</h3>
+                <button onclick="closeModal()" class="modal-close">&times;</button>
+            </div>
+            <form onsubmit="addCamera(event)">
+                <div class="form-group">
+                    <label>Nom</label>
+                    <input type="text" id="cam-name" required placeholder="Camera Hall Entree">
+                </div>
+                <div class="form-group">
+                    <label>URL du flux (RTSP/HTTP)</label>
+                    <input type="text" id="cam-url" required placeholder="rtsp://192.168.1.100:554/stream">
+                </div>
+                <div class="form-group">
+                    <label>Emplacement</label>
+                    <input type="text" id="cam-location" placeholder="Batiment A, Entree principale">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Latitude</label>
+                        <input type="number" id="cam-lat" step="any" placeholder="48.8566">
+                    </div>
+                    <div class="form-group">
+                        <label>Longitude</label>
+                        <input type="number" id="cam-lng" step="any" placeholder="2.3522">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Type de zone</label>
+                    <select id="cam-zone">
+                        <option value="general">General</option>
+                        <option value="road">Route</option>
+                        <option value="building">Batiment</option>
+                        <option value="public_space">Espace public</option>
+                        <option value="parking">Parking</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="cam-detection" checked>
+                        Detection IA activee
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal()" class="btn btn-secondary">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
