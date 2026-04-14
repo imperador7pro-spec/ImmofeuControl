@@ -1,5 +1,5 @@
 """
-ImmofeuControl - Core AI detection engine.
+Excubya - Core AI detection engine.
 Uses YOLO for object detection and custom logic for incident classification.
 """
 

@@ -1,8 +1,8 @@
-# ImmofeuControl
+# Excubya
 
 Systeme intelligent de detection d'incidents et d'alertes d'urgence en temps reel.
 
-ImmofeuControl utilise l'intelligence artificielle (YOLO + OpenCV) pour analyser les flux de cameras autorisees et detecter automatiquement les accidents, chutes, incendies, et urgences medicales. Les alertes sont envoyees en temps reel aux services d'urgence, reduisant drastiquement le temps d'intervention.
+Excubya utilise l'intelligence artificielle (YOLO + OpenCV) pour analyser les flux de cameras autorisees et detecter automatiquement les accidents, chutes, incendies, et urgences medicales. Les alertes sont envoyees en temps reel aux services d'urgence, reduisant drastiquement le temps d'intervention.
 
 ## Fonctionnalites
 
@@ -19,7 +19,7 @@ ImmofeuControl utilise l'intelligence artificielle (YOLO + OpenCV) pour analyser
 ## Architecture
 
 ```
-ImmofeuControl/
+Excubya/
 ├── main.py                  # Point d'entree
 ├── config/                  # Configuration (env, settings)
 ├── src/
@@ -56,7 +56,7 @@ ImmofeuControl/
 ```bash
 # Cloner le repo
 git clone <repo-url>
-cd ImmofeuControl
+cd Excubya
 
 # Creer un environnement virtuel
 python -m venv venv
@@ -126,7 +126,7 @@ ws.onmessage = (event) => {
 
 Dans `.env`, configurez les canaux de notification :
 
-- **Webhook** : `IMMOFEU_WEBHOOK_URL=https://votre-service.com/webhook`
+- **Webhook** : `EXCUBYA_WEBHOOK_URL=https://votre-service.com/webhook`
 - **Email** : Configurez SMTP dans `.env`
 - **SMS** : Configurez l'API SMS dans `.env`
 
@@ -148,7 +148,7 @@ Dans `.env`, configurez les canaux de notification :
 
 ## Configuration
 
-Toutes les options sont configurables via variables d'environnement (prefixe `IMMOFEU_`).
+Toutes les options sont configurables via variables d'environnement (prefixe `EXCUBYA_`).
 Voir `.env.example` pour la liste complete.
 
 ## Tests

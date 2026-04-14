@@ -1,4 +1,4 @@
-# ImmofeuControl - Accident Detection & Emergency Alert System
+# Excubya - Accident Detection & Emergency Alert System
 # Core
 fastapi==0.111.0
 uvicorn[standard]==0.30.1

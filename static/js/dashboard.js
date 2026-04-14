@@ -1,5 +1,5 @@
 /**
- * ImmofeuControl - Dashboard JavaScript
+ * Excubya - Dashboard JavaScript
  * Real-time monitoring interface
  */
 

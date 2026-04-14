@@ -1,5 +1,5 @@
 """
-ImmofeuControl - Database models.
+Excubya - Database models.
 Defines all persistent entities: cameras, incidents, alerts.
 """
 

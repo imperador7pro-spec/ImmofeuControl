@@ -1,5 +1,5 @@
 """
-ImmofeuControl - Main application entry point.
+Excubya - Main application entry point.
 Initializes all components and starts the FastAPI server.
 """
 
@@ -25,7 +25,7 @@ from src.api.routes import router, init_routes
 
 # Setup logging
 logger.add(
-    "logs/immofeucontrol_{time}.log",
+    "logs/excubya_{time}.log",
     rotation="10 MB",
     retention="30 days",
     level="INFO",
@@ -42,7 +42,7 @@ alert_manager = AlertManager()
 async def lifespan(app: FastAPI):
     """Application startup and shutdown."""
     logger.info("=" * 60)
-    logger.info("  ImmofeuControl - Starting up...")
+    logger.info("  Excubya - Starting up...")
     logger.info("=" * 60)
 
     # Create necessary directories
@@ -78,14 +78,14 @@ async def lifespan(app: FastAPI):
             )
         logger.info(f"Loaded {len(cameras)} cameras from database")
 
-    logger.info("ImmofeuControl is ready!")
+    logger.info("Excubya is ready!")
     logger.info(f"Dashboard: http://{settings.host}:{settings.port}")
     logger.info(f"API Docs:  http://{settings.host}:{settings.port}/docs")
 
     yield
 
     # Shutdown
-    logger.info("ImmofeuControl - Shutting down...")
+    logger.info("Excubya - Shutting down...")
     await alert_manager.stop()
     await detection_pipeline.stop()
     await camera_manager.stop()
@@ -97,7 +97,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
-        title="ImmofeuControl",
+        title="Excubya",
         description=(
             "Systeme de detection d'incidents et d'alertes d'urgence en temps reel. "
             "Utilise l'IA pour detecter les accidents, chutes, incendies et urgences medicales "

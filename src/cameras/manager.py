@@ -1,5 +1,5 @@
 """
-ImmofeuControl - Camera management system.
+Excubya - Camera management system.
 Handles RTSP/HTTP camera connections, reconnection, and frame capture.
 """
 

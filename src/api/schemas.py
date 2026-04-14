@@ -1,5 +1,5 @@
 """
-ImmofeuControl - API Pydantic schemas.
+Excubya - API Pydantic schemas.
 """
 
 from datetime import datetime

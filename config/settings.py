@@ -1,5 +1,5 @@
 """
-ImmofeuControl - Configuration settings.
+Excubya - Configuration settings.
 """
 
 from pydantic_settings import BaseSettings
@@ -11,14 +11,14 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # Application
-    app_name: str = "ImmofeuControl"
+    app_name: str = "Excubya"
     app_version: str = "1.0.0"
     debug: bool = False
     host: str = "0.0.0.0"
     port: int = 8000
 
     # Database
-    database_url: str = "sqlite+aiosqlite:///./immofeucontrol.db"
+    database_url: str = "sqlite+aiosqlite:///./excubya.db"
 
     # Detection
     detection_model: str = "yolov8n.pt"
@@ -50,4 +50,4 @@ class Settings(BaseSettings):
     secret_key: str = "CHANGE-ME-IN-PRODUCTION"
     api_key: Optional[str] = None
 
-    model_config = {"env_file": ".env", "env_prefix": "IMMOFEU_"}
+    model_config = {"env_file": ".env", "env_prefix": "EXCUBYA_"}

@@ -1,5 +1,5 @@
 """
-ImmofeuControl - Alert management system.
+Excubya - Alert management system.
 Handles sending real-time alerts via multiple channels.
 """
 
@@ -173,7 +173,7 @@ class AlertManager:
             from email.mime.text import MIMEText
 
             msg = MIMEText(message)
-            msg["Subject"] = f"[ImmofeuControl] Alerte - {record['incident_type'].upper()}"
+            msg["Subject"] = f"[Excubya] Alerte - {record['incident_type'].upper()}"
             msg["From"] = settings.smtp_user
             msg["To"] = settings.alert_email
 

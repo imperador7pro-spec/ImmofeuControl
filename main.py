@@ -1,5 +1,5 @@
 """
-ImmofeuControl - Entry point.
+Excubya - Entry point.
 Run with: python main.py
 """
 

@@ -1,5 +1,5 @@
 """
-ImmofeuControl - Detection pipeline.
+Excubya - Detection pipeline.
 Connects camera frames to the detection engine and triggers alerts.
 """
 

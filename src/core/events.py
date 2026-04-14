@@ -1,5 +1,5 @@
 """
-ImmofeuControl - Event bus for real-time communication between components.
+Excubya - Event bus for real-time communication between components.
 Uses asyncio queues and pub/sub pattern.
 """
 
