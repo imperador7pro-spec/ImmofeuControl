@@ -26,6 +26,7 @@ body {
     background: var(--bg-primary);
     color: var(--text-primary);
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 /* Navbar */
@@ -550,6 +551,7 @@ body {
 .filter-group {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .filter-group select {
@@ -585,4 +587,120 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 12px;
+        gap: 8px;
+    }
+
+    .nav-brand h1 {
+        font-size: 1rem;
+    }
+
+    .nav-links a {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+
+    .dashboard {
+        padding: 12px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .stat-card {
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .stat-value {
+        font-size: 1.4rem;
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .camera-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .panel-header {
+        padding: 12px 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .filter-group select {
+        font-size: 0.75rem;
+        padding: 5px 8px;
+    }
+
+    .modal-content {
+        width: 95%;
+        max-height: 95vh;
+        margin: 0 auto;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .incidents-table th,
+    .incidents-table td {
+        padding: 8px 10px;
+        font-size: 0.78rem;
+    }
+
+    .alert-banner {
+        padding: 10px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-brand h1 {
+        display: none;
+    }
+
+    .navbar {
+        padding: 0 10px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1.4rem;
+    }
+
+    .camera-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .camera-card-preview {
+        height: 140px;
+    }
 }
