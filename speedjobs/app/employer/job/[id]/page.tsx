@@ -30,7 +30,7 @@ export default function EmployerJobPage() {
     if (!params.id) return;
     const { data } = await getJobWithApplications(params.id);
     if (data) {
-      const { applications: apps, ...rest } = data as Job & {
+      const { applications: apps, ...rest } = data as unknown as Job & {
         applications: ApplicationWithCandidate[];
       };
       setJob(rest as Job);

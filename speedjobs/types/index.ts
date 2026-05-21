@@ -1,3 +1,11 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
 export type Database = {
   public: {
     Tables: {
@@ -33,6 +41,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['candidates']['Insert']>;
+        Relationships: [];
       };
       employers: {
         Row: {
@@ -62,6 +71,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['employers']['Insert']>;
+        Relationships: [];
       };
       jobs: {
         Row: {
@@ -95,6 +105,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['jobs']['Insert']>;
+        Relationships: [];
       };
       applications: {
         Row: {
@@ -118,6 +129,7 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['applications']['Insert']>;
+        Relationships: [];
       };
       reviews: {
         Row: {
@@ -139,8 +151,13 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['reviews']['Insert']>;
+        Relationships: [];
       };
     };
+    Views: { [_ in never]: never };
+    Functions: { [_ in never]: never };
+    Enums: { [_ in never]: never };
+    CompositeTypes: { [_ in never]: never };
   };
 };
 

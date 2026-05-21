@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -13,17 +13,20 @@ import { PageSpinner } from '@/components/ui/Spinner';
 import { formatDateTime } from '@/lib/utils';
 import type { Employer, Job } from '@/types';
 
-export default function EmployerDashboardPage() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
+function SuccessToast() {
   const searchParams = useSearchParams();
-  const [employer, setEmployer] = useState<Employer | null>(null);
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (searchParams.get('success')) toast.success('Paiement confirmé !');
   }, [searchParams]);
+  return null;
+}
+
+function DashboardInner() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [employer, setEmployer] = useState<Employer | null>(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (authLoading) return;
@@ -107,5 +110,16 @@ export default function EmployerDashboardPage() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function EmployerDashboardPage() {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <SuccessToast />
+      </Suspense>
+      <DashboardInner />
+    </>
   );
 }
