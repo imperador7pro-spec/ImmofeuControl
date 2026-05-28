@@ -57,6 +57,9 @@ async def lifespan(app: FastAPI):
     # Inject dependencies into routes
     init_routes(camera_manager, alert_manager, detection_pipeline, session_factory)
 
+    # Let the alert manager persist incidents and alerts to the database
+    alert_manager.set_session_factory(session_factory)
+
     # Load AI model
     await detection_engine.load_model()
 

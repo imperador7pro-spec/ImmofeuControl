@@ -69,7 +69,7 @@ Routes use **module-level globals** (`_camera_manager`, `_alert_manager`, `_dete
 
 DB models live in `src/core/models.py` (`Camera`, `Incident`, `Alert`, `EmergencyContact`) using async SQLAlchemy (`aiosqlite` by default). Status/type/severity values are stored as plain strings backed by `str`-enums.
 
-**Important:** only `Camera` and `EmergencyContact` rows are ever written. Detected incidents and alerts currently live only as bus events / in-memory history — **nothing writes to the `incidents` or `alerts` tables**. So `GET /api/incidents`, `GET /api/alerts`, and the `incidents_total`/`incidents_today` stats will always be empty/zero against a real DB. If a task involves incident or alert history, persisting these rows (likely a new `event_bus` subscriber that writes to the DB) is almost certainly the missing piece — flag it rather than assuming the read endpoints are broken elsewhere.
+**Persistence of incidents/alerts** is owned by `AlertManager`: when it handles an `incident.detected` event it first writes an `Incident` row (`_persist_incident`), then writes one `Alert` row per delivered channel (`_persist_alerts`), linked by `incident_id`. This is why `GET /api/incidents`, `GET /api/alerts`, the dashboard incidents table, and the `incidents_today`/`incidents_total` stats populate. The DB session factory is injected at startup via `alert_manager.set_session_factory(...)` in the `lifespan` handler — if it is not set (e.g. in unit tests), persistence is skipped silently and alert delivery still works. `Camera` and `EmergencyContact` rows are written directly by the API routes.
 
 ## Configuration
 
