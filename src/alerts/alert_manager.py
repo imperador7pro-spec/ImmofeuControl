@@ -32,6 +32,11 @@ class AlertManager:
         self._alert_history: list[dict] = []
         self._running = False
         self._http_client: Optional[httpx.AsyncClient] = None
+        self._session_factory = None
+
+    def set_session_factory(self, session_factory):
+        """Provide the DB session factory so incidents/alerts get persisted."""
+        self._session_factory = session_factory
 
     async def start(self):
         """Start the alert manager and subscribe to incident events."""
@@ -63,7 +68,7 @@ class AlertManager:
         return self._alert_history.copy()
 
     async def _on_incident(self, event: Event):
-        """Handle an incident event — send alerts on all configured channels."""
+        """Handle an incident event — persist it then send alerts on all channels."""
         data = event.data
         alert_message = self._format_alert(data)
 
@@ -79,6 +84,10 @@ class AlertManager:
             "channels_sent": [],
         }
 
+        # Persist the incident so it shows up in the dashboard table, the
+        # /api/incidents endpoint and the statistics.
+        incident_id = await self._persist_incident(data)
+
         # Send via all channels concurrently
         tasks = [self._send_websocket_alert(data, alert_record)]
 
@@ -93,10 +102,64 @@ class AlertManager:
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
+        # Persist one alert row per channel that was actually delivered.
+        if incident_id is not None and alert_record["channels_sent"]:
+            await self._persist_alerts(incident_id, alert_message, alert_record["channels_sent"])
+
         self._alert_history.append(alert_record)
         # Keep only last 1000 alerts in memory
         if len(self._alert_history) > 1000:
             self._alert_history = self._alert_history[-1000:]
+
+    async def _persist_incident(self, data: dict) -> Optional[int]:
+        """Save the detected incident to the database. Returns its id (or None)."""
+        if not self._session_factory:
+            return None
+        try:
+            from src.core.models import Incident
+
+            detected_at = datetime.utcnow()
+            if data.get("timestamp"):
+                detected_at = datetime.utcfromtimestamp(data["timestamp"])
+
+            async with self._session_factory() as session:
+                incident = Incident(
+                    camera_id=data["camera_id"],
+                    incident_type=data["incident_type"],
+                    severity=data["severity"],
+                    confidence=data["confidence"],
+                    description=data.get("description"),
+                    snapshot_path=data.get("snapshot_path"),
+                    detected_objects=json.dumps(data.get("detections", [])),
+                    detected_at=detected_at,
+                )
+                session.add(incident)
+                await session.commit()
+                await session.refresh(incident)
+                return incident.id
+        except Exception as e:
+            logger.error(f"Failed to persist incident: {e}")
+            return None
+
+    async def _persist_alerts(self, incident_id: int, message: str, channels: list[str]):
+        """Save one alert row per delivered channel, linked to the incident."""
+        if not self._session_factory:
+            return
+        try:
+            from src.core.models import Alert
+
+            async with self._session_factory() as session:
+                for channel in channels:
+                    session.add(Alert(
+                        incident_id=incident_id,
+                        alert_type=channel,
+                        status="sent",
+                        message=message,
+                        sent_at=datetime.utcnow(),
+                    ))
+                await session.commit()
+        except Exception as e:
+            logger.error(f"Failed to persist alerts: {e}")
 
     def _format_alert(self, data: dict) -> str:
         """Format an alert message."""
